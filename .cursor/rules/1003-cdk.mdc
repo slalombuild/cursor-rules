@@ -1,15 +1,15 @@
 ---
 description: APPLY AWS CDK best practices WHEN generating, organizing, or validating infrastructure code using the AWS Cloud Development Kit TO ensure production-readiness, reusability, and security.
-globs: **/cdk/**, **/*.ts, **/*.js, **/*.py, **/*.java, **/*.cs, **/cdk.json, **/context.json
+globs: **/src/**, **/cdk/**, **/*.ts, **/*.js, **/*.py, **/*.java, **/*.cs, **/cdk.json, **/context.json
 alwaysApply: false
 ---
 
 # AWS CDK Best Practices
 
-<version>1.0.0</version>
+<version>1.0.1</version>
 
 ## Context
-- These rules apply to the AWS Cloud Development Kit (CDK) projects.
+- These rules apply to the AWS Cloud Development Kit (CDK) projects in TypeScript.
 - Emphasize infrastructure-as-code discipline, strong typing, reuse, and automation.
 - Ensure projects are production-ready, testable, and follow secure defaults.
 
@@ -17,17 +17,23 @@ alwaysApply: false
 
 ### Project Structure
 - Structure the repo to separate stacks, constructs, and utilities:
-  - `bin/` → Entry points (e.g., `bin/my-app.ts`).
+  - `app.ts` → Entry point.
+  - `src/` or `cdk/` → CDK source code.
+    - `src/__tests__` → Unit tests.
+    - `src/services` → Reusable services (i.e. AWS SNS, AWS IAM, AWS Lambda).
+    - `src/stacks` → CDK stack definitions.
+    - `src/stacks/__tests__` → Stack unit tests.
+    - `src/types` → Reusable types (i.e. domain, environment).
   - `lib/` → Reusable constructs and stacks.
-  - `test/` → Unit and integration tests.
-  - `cdk.json` → Define default app, context.
-  - `context.json` → Store environment-specific values.
+  - `cdk-ts.json` → Define default app, context.
+  - `cdk.context.json` → Store environment-specific values.
 
 ### Stack Design & Modularity
 - Use constructs to encapsulate resources with a specific responsibility.
 - Limit stacks to <20 resources for maintainability; otherwise, split into nested stacks or constructs.
 - Abstract reusable logic into `Constructs`.
 - Avoid hardcoding values; use context variables or environment settings.
+- Group logical units (API, database, monitoring) into constructs, and use stacks only for deployment composition
 
 ### Configuration and Environments
 - Avoid hardcoding account or region values in stacks.
@@ -73,14 +79,19 @@ alwaysApply: false
 ### Documentation
 - Document purpose and usage in `README.md` for each app or module.
 - Use inline comments for complex logic.
-- Include diagrams (using mermaid) or usage examples where helpful.
+- Include diagrams (using mermaid) and usage examples where helpful.
+  - Use CDK Graph to automate diagram generation (https://aws.github.io/aws-pdk/developer_guides/cdk-graph/index.html)
 
 ## Critical Rules
 
 <critical>
 - NEVER store secrets or environment credentials in source.
 - ALWAYS run `cdk synth` to validate generated CloudFormation.
-- ALWAYS use CDK context or environment configuration for deploy-time values.
-- NEVER mix CDK v1 and v2 libraries.
-- ALWAYS follow the resource tagging policy (if it's undefined, seek clarification).
+- ALWAYS follow the resource tagging policy (if it's undefined, seek explicit clarification)
+- ALWAYS use constructs for logical units; reserve stacks solely for deployment grouping  
+- NEVER embed environment-variable lookups inside constructs  
+- ALWAYS unit-test with the CDK assertions module and keep synthesis deterministic
+- NEVER mix CDK v1 and v2 libraries
+- PREFER high-level L2 constructs; extend or wrap them for organization-wide patterns  
+- ALWAYS scope CDK CLI commands to target specific stacks and/or environments to avoid unintended changes, or use CDK context
 </critical>
