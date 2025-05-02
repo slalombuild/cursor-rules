@@ -6,7 +6,7 @@ alwaysApply: false
 
 # AWS CDK Best Practices
 
-<version>1.0.1</version>
+<version>1.0.2</version>
 
 ## Context
 - These rules apply to the AWS Cloud Development Kit (CDK) projects in TypeScript.
@@ -27,6 +27,17 @@ alwaysApply: false
   - `lib/` → Reusable constructs and stacks.
   - `cdk-ts.json` → Define default app, context.
   - `cdk.context.json` → Store environment-specific values.
+
+### Coding Style
+- Prefer L2 constructs over L1. Use escape hatches only when required.
+- Prefer the const object over enum https://www.typescriptlang.org/docs/handbook/enums.html#objects-vs-enums
+- When stacks are a part of the same CDK app, prefer passing Props between stacks over Fn.ImportValue()
+- Configure with properties and methods, not environment variables
+- Let the AWS CDK manage roles and security groups with the construct library's grant() convenience methods
+- Prefer keeping stateful resources (like VPCs) in a separate stack (network/core/shared stack) from stateless resources (like API Gateway).
+- Define removal policies and log retention
+- Prefer using generated resource names, not physical names
+- Keep things simple as possible—but no simpler. Add complexity only when your requirements dictate a more complicated solution
 
 ### Stack Design & Modularity
 - Use constructs to encapsulate resources with a specific responsibility.
